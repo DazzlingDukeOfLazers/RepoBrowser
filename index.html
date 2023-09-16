@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js SVG Example</title>
+    <script src="https://threejs.org/build/three.js"></script>
+    <script src="https://threejs.org/examples/jsm/loaders/SVGLoader.js"></script>
+    <style>
+        #button-container {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+        body {
+            margin: 0;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SVG example of a green circle -->
+    <svg id="svg-example" width="0" height="0" style="position:absolute; visibility: hidden;">
+        <circle cx="50" cy="50" r="50" fill="green" />
+    </svg>
+
+    <!-- Buttons to resize SVG -->
+    <div id="button-container">
+        <button id="increase">+</button>
+        <button id="decrease">-</button>
+    </div>
+
+    <script>
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        camera.position.z = 5;
+
+        var svgScale = 1;
+        var svgMesh;
+
+        var loader = new THREE.SVGLoader();
+        loader.load('data:image/svg+xml,' + encodeURIComponent(document.getElementById('svg-example').outerHTML), function(data) {
+            var paths = data.paths;
+            var group = new THREE.Group();
+            group.scale.multiplyScalar(svgScale);
+
+            for (var i = 0; i < paths.length; i++) {
+                var path = paths[i];
+                var material = new THREE.MeshBasicMaterial({
+                    color: path.color,
+                    side: THREE.DoubleSide,
+                    depthWrite: false
+                });
+
+                var shapes = path.toShapes(true);
+                for (var j = 0; j < shapes.length; j++) {
+                    var shape = shapes[j];
+                    var geometry = new THREE.ShapeBufferGeometry(shape);
+                    var mesh = new THREE.Mesh(geometry, material);
+                    group.add(mesh);
+                }
+            }
+
+            svgMesh = group;
+            scene.add(group);
+
+            // Buttons for resizing the SVG
+            document.getElementById("increase").addEventListener("click", function() {
+                svgScale += 0.1;
+                svgMesh.scale.set(svgScale, svgScale, svgScale);
+            });
+
+            document.getElementById("decrease").addEventListener("click", function() {
+                svgScale -= 0.1;
+                svgMesh.scale.set(svgScale, svgScale, svgScale);
+            });
+        });
+
+        var animate = function() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        };
+
+        animate();
+
+        window.addEventListener('resize', function() {
+            var newWidth = window.innerWidth;
+            var newHeight = window.innerHeight;
+
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(newWidth, newHeight);
+        }, false);
+    </script>
+</body>
+</html>
