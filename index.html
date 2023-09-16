@@ -21,12 +21,6 @@
     </style>
 </head>
 <body>
-
-    <!-- SVG example of a green circle -->
-    <svg id="svg-example" width="0" height="0" style="position:absolute; visibility: hidden;">
-        <circle cx="50" cy="50" r="50" fill="green" />
-    </svg>
-
     <!-- Buttons to resize SVG -->
     <div id="button-container">
         <button id="increase">+</button>
@@ -43,11 +37,15 @@
 
         camera.position.z = 5;
 
-        var svgScale = 1;
+        var svgScale = 0.01; // Change this to your desired initial scale
         var svgMesh;
 
+        var svgData = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="50" fill="green" />
+        </svg>`;
+
         var loader = new THREE.SVGLoader();
-        loader.load('data:image/svg+xml,' + encodeURIComponent(document.getElementById('svg-example').outerHTML), function(data) {
+        loader.load('data:image/svg+xml,' + encodeURIComponent(svgData), function(data) {
             var paths = data.paths;
             var group = new THREE.Group();
             group.scale.multiplyScalar(svgScale);
@@ -74,12 +72,12 @@
 
             // Buttons for resizing the SVG
             document.getElementById("increase").addEventListener("click", function() {
-                svgScale += 0.1;
+                svgScale += 0.001;
                 svgMesh.scale.set(svgScale, svgScale, svgScale);
             });
 
             document.getElementById("decrease").addEventListener("click", function() {
-                svgScale -= 0.1;
+                svgScale -= 0.001;
                 svgMesh.scale.set(svgScale, svgScale, svgScale);
             });
         });
