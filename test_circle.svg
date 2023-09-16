@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js with SVG Green Circle</title>
+    <script src="https://threejs.org/build/three.js"></script>
+    <script src="https://threejs.org/examples/jsm/loaders/SVGLoader.js"></script>
+</head>
+<body>
+    <script>
+        // Create Three.js scene, camera, and renderer
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // SVG data as a string
+        var svgString = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="50" fill="green"/>
+            </svg>
+        `;
+
+        // Load SVG string with SVGLoader
+        var loader = new THREE.SVGLoader();
+        loader.load('data:image/svg+xml,' + encodeURIComponent(svgString), function(data) {
+
+            // Loop through all of the parsed paths and convert to meshes
+            var group = new THREE.Group();
+            data.paths.forEach(function (path) {
+
+                var material = new THREE.MeshBasicMaterial({
+                    color: path.color,
+                    side: THREE.DoubleSide,
+                    depthWrite: false,
+                    wireframe: false
+                });
+
+                var shapes = path.toShapes(true);
+                shapes.forEach(function(shape) {
+                    var geometry = new THREE.ShapeBufferGeometry(shape);
+                    var mesh = new THREE.Mesh(geometry, material);
+                    group.add(mesh);
+                });
+            });
+
+            scene.add(group);
+        });
+
+        camera.position.z = 5;
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
